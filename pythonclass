@@ -1,0 +1,120 @@
+class Product:
+    def __init__(self, name, price, stock):
+        self.name = name
+        self.price = price
+        self.stock = stock
+
+    def update_stock(self, amount):
+        self.stock += amount
+        if self.stock < 0:
+            self.stock = 0
+        print(f"Updated stock for {self.name}. New stock: {self.stock}")
+
+
+class ShoppingCart:
+    def __init__(self):
+        self.items = []
+        self.total_amount = 0.0
+
+    def add_to_cart(self, product, quantity):
+        if product.stock >= quantity:
+            self.items.append((product, quantity))
+            product.update_stock(-quantity)
+            print(f"Added {quantity} of {product.name} to the cart.")
+        else:
+            print(f"Sorry, only {product.stock} items of {product.name} are available.")
+
+    def remove_from_cart(self, product_name):
+        for item in self.items:
+            if item[0].name == product_name:
+                product = item[0]
+                product.update_stock(item[1])
+                self.items.remove(item)
+                print(f"Removed {item[1]} of {product.name} from the cart.")
+                break
+        else:
+            print(f"Product '{product_name}' not found in the cart.")
+
+    def calculate_total(self):
+        self.total_amount = sum(item[0].price * item[1] for item in self.items)
+        print(f"Total amount: ${self.total_amount:.2f}")
+
+    def apply_discount(self, discount):
+        if 0 <= discount <= 100:
+            discount_amount = (discount / 100) * self.total_amount
+            self.total_amount -= discount_amount
+            print(f"Applied {discount}% discount. Total amount after discount: ${self.total_amount:.2f}")
+        else:
+            print("Invalid discount percentage. Must be between 0 and 100.")
+
+    def checkout(self):
+        if not self.items:
+            print("Your cart is empty.")
+        else:
+            self.calculate_total()
+            print(f"Proceeding to checkout. Total amount to pay: ${self.total_amount:.2f}")
+            self.items.clear()
+            self.total_amount = 0.0
+            print("Thank you for your purchase!")
+
+
+products = [
+    Product("Laptop", 1000, 10),
+    Product("Smartphone", 500, 20),
+    Product("Headphones", 100, 15),
+]
+
+cart = ShoppingCart()
+
+while True:
+    print("\n--- E-commerce Platform ---")
+    print("1. View Products")
+    print("2. Add Product to Cart")
+    print("3. Remove Product from Cart")
+    print("4. View Cart and Total")
+    print("5. Apply Discount")
+    print("6. Checkout")
+    print("7. Exit")
+
+    choice = input("Enter your choice: ")
+
+    if choice == "1":
+        print("\nAvailable Products:")
+        for i, product in enumerate(products, 1):
+            print(f"{i}. {product.name} - ${product.price} (Stock: {product.stock})")
+
+    elif choice == "2":
+        product_index = int(input("Enter the product number to add to cart: ")) - 1
+        if 0 <= product_index < len(products):
+            product = products[product_index]
+            quantity = int(input(f"Enter the quantity of {product.name}: "))
+            cart.add_to_cart(product, quantity)
+        else:
+            print("Invalid product selection.")
+
+    elif choice == "3":
+        product_name = input("Enter the name of the product to remove from cart: ")
+        cart.remove_from_cart(product_name)
+
+    elif choice == "4":
+        print("\nItems in Your Cart:")
+        if not cart.items:
+            print("Your cart is empty.")
+        else:
+            for product, quantity in cart.items:
+                print(f"{product.name} - {quantity} x ${product.price}")
+            cart.calculate_total()
+
+    elif choice == "5":
+        discount = float(input("Enter discount percentage to apply: "))
+        cart.apply_discount(discount)
+
+    elif choice == "6":
+        cart.checkout()
+
+    elif choice == "7":
+        print("Exiting the platform. Goodbye!")
+        break
+
+    else:
+        print("Invalid choice. Please try again.")
